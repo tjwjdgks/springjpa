@@ -3,3 +3,23 @@
     실무에서 페이징 쿼리 잘 안쓰려고 하는 이유 total count 때문이다
          total count 는 db의 모든 데이터 count 해야 한다, 따라서 totalcount 가 데이터가 많아질 수 록 성능이 느려질 수 있다
          따라서 jpa는 페이지의 total count를 분리하는 기능을 제공한다
+
+    벌크성 수정 쿼리 database에서 한번에 data를 일괄 변경해야 하는 경우
+
+    벌크성 수정 쿼리 조심해야 한다. 벌크 연산은 영속성 컨텍스트를 거치지 않고 바로 db에 변경한다
+        벌크 연산후에는 db와 영속성 컨텍스트 동기화를 해주어야 한다 or 영속성 컨텍스트를 날린다. 날리는 경우 db에서 찾아 다시 영속성 컨텍스트에 넣어준다
+
+    하이버네이트는 내부에 최적화 기능이 있다.
+        JPQL이 실행될 때 영속성 컨텍스트에 있는 데이터 먼저 flush 하고 JPQL이 실행된다
+        JPQL을 실행할 때 사실 모든 내용을 다 플러시 하는 것이 아니라, 해당 JPQL과 관련 있는 엔티티만 플러시한다.
+        이 상태에서 clearAutomatically가 실행되면 플러시 되지 않은 내용에 문제가 발생할 수 있다.
+
+        따라서 남아 있는 관련없는 변경된 엔티티 db에 flush 해주어야 한다. => 모든 내용을 플러시하는 flushAutomatically 옵션이 생겼다
+
+    JPA 쿼리 힌트 (SQL 힌트가 아니라 JPA 구현체에 제공하는 힌트)
+        조회용 최적화 hibernate에서 제공 ex)  @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly",value = "true"))
+        읽을 때 readOnlyTrue 가 되어 있으면 내부적으로 스냅샷을 안 만든다. 변경이 안된다고 가정하고 모두 무시한다. 변경 감지 안한다
+
+
+
+

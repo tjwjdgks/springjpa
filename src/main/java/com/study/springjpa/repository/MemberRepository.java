@@ -5,10 +5,11 @@ import com.study.springjpa.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.*;
 import org.springframework.data.repository.query.Param;
 
+import javax.persistence.LockModeType;
+import javax.persistence.QueryHint;
 import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -41,5 +42,24 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // count 쿼리 분리
     @Query(value = "select m from Member m left join m.team t", countQuery = "select count(m.username) from Member m")
     Page<Member> findPageWithCountByAge(int age, Pageable pageable);
+
+    // @Modifying, executeUpdate 실행, 이 어노테이션이 없으면 getResultList나 getSingleResult를 실행한다
+    @Modifying(clearAutomatically = true,flushAutomatically = true)
+    @Query("update Member m set m.age = m.age+1 where m.age >= :age")
+    int bulkAgePlus(@Param("age") int age);
+
+
+    // fetch 조인
+    @EntityGraph(attributePaths = {"team"})
+    @Query("select m from Member m")
+    List<Member> findFetchAll();
+
+    @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly",value = "true"))
+    Member findReadOnlyByUsername(String username);
+
+
+    // 락을 걸 수 있다 // select for update
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Member> findLockByUsername(String username);
 
 }
