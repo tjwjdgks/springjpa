@@ -20,6 +20,42 @@
         조회용 최적화 hibernate에서 제공 ex)  @QueryHints(value = @QueryHint(name = "org.hibernate.readOnly",value = "true"))
         읽을 때 readOnlyTrue 가 되어 있으면 내부적으로 스냅샷을 안 만든다. 변경이 안된다고 가정하고 모두 무시한다. 변경 감지 안한다
 
+    커스텀 리포지토리
+       스프링 데이터 1.9.x 버전까지는 MemberRepositoryImpl처럼 작성해야만 했다.
+       최근에는 Custom 인터페이스명 + Impl을 붙이는 방식도 지원하고, 이 방식을 더 권장합니다.
+       기능상의 차이는 없고, 대신에 Custom 인터페이스명 + Impl을 사용하면 인터페이스와 구현체를 1개 이상 만들어서 분리할 수 있습니다.
+       https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#repositories.custom-implementations
 
+    의존관계
+        entity는 dto를 보지 않으면 좋다, dto는 entity를 봐도 상관 없다
 
+    트랜잭션 별다른 옵션이 없으면, 기존의 트랜잭션 level을 이어받아 동작한다
 
+    * save() 메서드*
+        새로운 엔티티면 저장( persist )
+        새로운 엔티티가 아니면 병합( merge ) , db의 값이 들어있다고 판단 select 문으로 영속성 컨텍스트 등록
+
+        새로운 엔티티를 판단하는 기본 전략
+        식별자가 객체일 때 null 로 판단
+        식별자가 자바 기본 타입일 때 0 으로 판단
+        Persistable 인터페이스를 구현해서 판단 로직 변경 가능
+
+    데이터의 변경은 변경 감지 기능을 써야하고 데이터의 저장은 persist를 써야한다 generation value를 못쓸경우 Persistable 인터페이스 구현
+
+    extra 기능
+
+    specification 명세
+        조건을 조합해서 사용할 수 있는 개념
+        predicate
+            참 또는 거짓으로 평사
+            and, or 같은 연산자를 조합해서 다양한 검색조건을 쉽게 생성(컴포지트 패턴)
+
+    query by example
+
+    Projections
+        엔티티 대신에 Dto를 편리하게 조회할 때 사용
+        전체 엔티티가 아니라 원하는 데이터만 조회하고 싶을 때 사용
+
+        인터페이스만 정의하면 실제 구현체는 spring data jpa가 프록시로 만들어준다
+
+    네이티브 쿼리

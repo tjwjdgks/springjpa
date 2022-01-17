@@ -221,4 +221,78 @@ class MemberRepositoryTest {
         List<Member> result = memberRepository.findLockByUsername("member1");
         em.flush();
     }
+
+    @Test
+    public void callCustom(){
+        List<Member> result = memberRepository.findMemberCustom();
+    }
+
+    @Test
+    public void JpaEventBaseEntity() throws InterruptedException {
+        Member member = memberRepository.save(new Member("member1", 10));
+
+        Thread.sleep(1000);
+        member.setUsername("member2");
+
+        em.flush();
+        em.clear();
+
+        Member findMember = memberRepository.findById(member.getId()).get();
+
+        System.out.println("createDate "+member.getCreateDate());
+        System.out.println("updateDate "+member.getLastModifiedDate());
+        System.out.println("createBy "+member.getCreatedBy());
+        System.out.println("updateBy "+member.getLastModifiedBy());
+
+    }
+
+    @Test
+    public void projections(){
+        Team teamA = new Team("teamA");
+        teamRepository.save(teamA);
+
+        memberRepository.save(new Member("member1",10,teamA));
+        memberRepository.save(new Member("member2",10,teamA));
+
+        em.flush();
+        em.clear();
+
+        List<UsernameOnly> member1 = memberRepository.findProjectionByUsername("member1");
+
+        member1.forEach(i->System.out.println(i.getUsername()));
+
+    }
+
+    @Test
+    public void nativequery(){
+        Team teamA = new Team("teamA");
+        teamRepository.save(teamA);
+
+        memberRepository.save(new Member("member1",10,teamA));
+        memberRepository.save(new Member("member2",10,teamA));
+
+        em.flush();
+        em.clear();
+
+        Member member1 = memberRepository.findByNativeQuery("member1");
+        System.out.println(member1);
+
+    }
+    @Test
+    public void native_projction_query(){
+        Team teamA = new Team("teamA");
+        teamRepository.save(teamA);
+
+        memberRepository.save(new Member("member1",10,teamA));
+        memberRepository.save(new Member("member2",10,teamA));
+
+        em.flush();
+        em.clear();
+
+        Page<MemberProjection> result = memberRepository.findByNativeProjection(PageRequest.of(0, 10));
+        List<MemberProjection> content = result.getContent();
+        content.forEach(i->System.out.println(i.getId() + " "+i.getUsername()+ " " + i.getTeamName()));
+        System.out.println(result.getTotalElements());
+    }
+
 }

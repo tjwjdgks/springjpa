@@ -12,7 +12,7 @@ import javax.persistence.LockModeType;
 import javax.persistence.QueryHint;
 import java.util.List;
 
-public interface MemberRepository extends JpaRepository<Member, Long> {
+public interface MemberRepository extends JpaRepository<Member, Long>, MemberRepositoryCustom {
 
     List<Member> findByUsernameAndAgeGreaterThan(String username, int age);
 
@@ -62,4 +62,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<Member> findLockByUsername(String username);
 
+    // projection
+    List<UsernameOnly> findProjectionByUsername(String username);
+
+    // native query
+    @Query(value = "select * from member where username = ?",nativeQuery = true)
+    Member findByNativeQuery(String name);
+
+    // native query + projection
+    @Query(value = "select m.member_id as id, m.username, t.name as teamName from member m left join team t ",
+            countQuery = "select count(*) from member",nativeQuery = true)
+    Page<MemberProjection> findByNativeProjection(Pageable pageable);
 }
