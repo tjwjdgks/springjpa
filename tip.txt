@@ -1,0 +1,5 @@
+
+    페이징 index는 0부터 시작이다
+    실무에서 페이징 쿼리 잘 안쓰려고 하는 이유 total count 때문이다
+         total count 는 db의 모든 데이터 count 해야 한다, 따라서 totalcount 가 데이터가 많아질 수 록 성능이 느려질 수 있다
+         따라서 jpa는 페이지의 total count를 분리하는 기능을 제공한다
